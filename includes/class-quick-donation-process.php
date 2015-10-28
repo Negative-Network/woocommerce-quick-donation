@@ -86,13 +86,21 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
      
     public function process_donation(){
         if(isset($_POST['donation_add'])){
-            if($this->check_donation_already_exist()){
-                $message = WC_QD()->db()->get_message(WC_QD_DB.'donation_already_exist');
-                wc_add_notice($message,'error');
-                return ;
-            }
             
             global $woocommerce;
+
+            //add form data into the WC session
+            $woocommerce->session->customer = array_merge($woocommerce->session->customer,$_POST);
+
+            if($this->check_donation_already_exist()){
+                // $message = WC_QD()->db()->get_message(WC_QD_DB.'donation_already_exist');
+                // wc_add_notice($message,'error');
+
+                $this->redirect_cart();
+                
+                return ;
+            }
+
             $donateprice = isset($_POST['wc_qd_donate_project_price']) ? $_POST['wc_qd_donate_project_price'] : false;
 			$projects = isset($_POST['wc_qd_donate_project_name']) && !empty($_POST['wc_qd_donate_project_name']) ? $_POST['wc_qd_donate_project_name'] : false;
 
