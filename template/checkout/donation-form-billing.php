@@ -12,15 +12,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** @global WC_Checkout $checkout */
+
+global $woocommerce;
+
 ?>
-<div class="woocommerce-billing-fields">
+<div class="woocommerce-billing-fields" style="display: none">
 	<?php if ( WC()->cart->ship_to_billing_address_only() && WC()->cart->needs_shipping() ) : ?>
 
 		<h3><?php _e( 'Billing &amp; Shipping', 'woocommerce' ); ?></h3>
 
 	<?php else : ?>
 
-		<h3><?php _e( 'Donor Details', 'woocommerce' ); ?></h3>
+		<h3><?php _e( 'Doner Details', 'woocommerce' ); ?></h3>
 
 	<?php endif; ?>
 
@@ -28,7 +31,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php foreach ( $checkout->checkout_fields['billing'] as $key => $field ) : ?>
 
-		<?php woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); ?>
+		<?php 
+		if(isset($woocommerce->session->customer[$key]))
+			woocommerce_form_field( $key, $field, $woocommerce->session->customer[$key] );
+		else
+			woocommerce_form_field( $key, $field, $checkout->get_value( $key ) );
+		?>
 
 	<?php endforeach; ?>
 
