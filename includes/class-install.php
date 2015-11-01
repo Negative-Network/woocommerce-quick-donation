@@ -7,6 +7,7 @@ class WC_QD_INSTALL{
      */
     public static function init(){
         $donation_exist = self::check_donation_exists();
+        $recurring_donation_exist = self::check_recurring_donation_exists();
         self::check_db_version();
         self::post_register();
         self::wc_qd_table_install();
@@ -15,6 +16,11 @@ class WC_QD_INSTALL{
         if(! $donation_exist){
             $post_id = self::create_donation(); 
             update_option(WC_QD_DB.'product_id',$post_id); 
+        }
+
+        if(! $recurring_donation_exist){
+            $post_id = self::create_recurring_donation(); 
+            update_option(WC_QD_DB.'recurring_product_id',$post_id); 
         }
     }
     
@@ -40,6 +46,15 @@ class WC_QD_INSTALL{
      */
     public static function check_donation_exists(){
         $exist = get_option(WC_QD_DB.'product_id');
+        if($exist && get_post_status ($exist)){ return true; }
+        return false;
+    }
+    
+    /**
+     * Checks Recurring Donation Product Exists
+     */
+    public static function check_recurring_donation_exists(){
+        $exist = get_option(WC_QD_DB.'recurring_product_id');
         if($exist && get_post_status ($exist)){ return true; }
         return false;
     }
@@ -93,7 +108,54 @@ class WC_QD_INSTALL{
         update_post_meta($post_id, '_featured', 'no');
         update_post_meta($post_id, '_manage_stock', "no" );
         update_post_meta($post_id, '_sold_individually', "yes" );
-        update_post_meta($post_id, '_sku', 'checkout-donation');   			
+        update_post_meta($post_id, '_sku', 'checkout-donation');            
+        return $post_id;
+    }
+     
+    /**
+     * Create Recurring Donation Product In WooCommerce
+     * rely on the WC subscription plugin for now
+     * @return int donation Post id
+     */
+    public static function create_recurring_donation(){
+        $userID = 1;
+        if(get_current_user_id()){ $userID = get_current_user_id(); }
+        
+        $post = array(
+            'post_author' => $userID,
+            'post_content' => 'Used For Reccuring Donation',
+            'post_status' => 'publish',
+            'post_title' => 'Donation - Reccuring',
+            'post_type' => 'product',
+        );
+        
+        $post_id = wp_insert_post($post);  
+
+        update_post_meta($post_id, '_stock_status', 'instock');
+        update_post_meta($post_id, '_tax_status', 'none');
+        update_post_meta($post_id, '_tax_class',  'zero-rate');
+        update_post_meta($post_id, '_visibility', 'hidden');
+        update_post_meta($post_id, '_stock', '');
+        update_post_meta($post_id, '_virtual', 'yes');
+        update_post_meta($post_id, '_featured', 'no');
+        update_post_meta($post_id, '_manage_stock', "no" );
+        update_post_meta($post_id, '_sold_individually', "yes" );
+        update_post_meta($post_id, '_sku', 'checkout-recurring-donation');
+        update_post_meta($post_id, '_regular_price', 10);
+        update_post_meta($post_id, '_price', 10);
+        
+        //subscription data
+        update_post_meta($post_id, '_subscription_price', 10);
+        update_post_meta($post_id, '_subscription_payment_sync_date', 0);
+        update_post_meta($post_id, '_subscription_trial_length', 0);
+        update_post_meta($post_id, '_subscription_sign_up_fee', '');
+        update_post_meta($post_id, '_subscription_period', 'month');
+        update_post_meta($post_id, '_subscription_period_interval', 1);
+        update_post_meta($post_id, '_subscription_length', 0);
+        update_post_meta($post_id, '_subscription_trial_period', 'day');
+        update_post_meta($post_id, '_subscription_limit', 'no');
+        update_post_meta($post_id, '_subscription_one_time_shipping', 'no');
+
         return $post_id;
     }
     

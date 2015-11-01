@@ -27,9 +27,11 @@ class WooCommerce_Quick_Donation {
 	 */
 	protected static $_instance = null;
     public static $is_donation_product_exist = true;
+    public static $is_recurring_donation_product_exist = true;
     protected static $f = null;
     public static $shortcode = null;
     public static $donation_id = null;
+    public static $recurring_donation_id = null;
     public static $settings = null;
     public static $settings_values = null;
     public static $email = null;
@@ -51,6 +53,8 @@ class WooCommerce_Quick_Donation {
         $this->define_constant();
         self::$donation_id = get_option(WC_QD_DB.'product_id');
         $this->define('WC_QD_ID',intval(get_option(WC_QD_DB.'product_id')));
+        self::$recurring_donation_id = get_option(WC_QD_DB.'recurring_product_id');
+        $this->define('WC_QD_ID',intval(get_option(WC_QD_DB.'recurring_product_id')));
         $this->load_required_files();
         register_activation_hook( __FILE__,array('WC_QD_INSTALL','INIT') );
         add_action( 'init', array( $this, 'init' ));
@@ -61,6 +65,7 @@ class WooCommerce_Quick_Donation {
      */
     public function init(){
         $this->check_donation_product_exist();
+        $this->check_recurring_donation_product_exist();
         $this->init_class();
         add_action('plugins_loaded', array( $this, 'after_plugins_loaded' ));
         add_filter('load_textdomain_mofile',  array( $this, 'load_plugin_mo_files' ), 10, 2);
@@ -68,12 +73,31 @@ class WooCommerce_Quick_Donation {
     
     /**
      * Checks If Donation Product Exist In WooCommerce Products
+     * if not create it
      */
     private function check_donation_product_exist($notice = true){
         $install = new WC_QD_INSTALL;
         if(! $install->check_donation_exists()){
-            self::$is_donation_product_exist = false;
-            if($notice){ wc_qd_notice('WooCommerce Donation Product Not Exist','error',true);}
+            self::$donation_id = WC_QD_INSTALL::create_donation();
+            self::$is_donation_product_exist = true;
+            update_option(WC_QD_DB.'product_id',self::$donation_id); 
+            // self::$is_donation_product_exist = false;
+            // if($notice){ wc_qd_notice('WooCommerce Donation Product Not Exist','error',true);}
+        }
+    }
+    
+    /**
+     * Checks If Recurring Donation Product Exist In WooCommerce Products
+     * if not create it
+     */
+    private function check_recurring_donation_product_exist($notice = true){
+        $install = new WC_QD_INSTALL;
+        if(! $install->check_recurring_donation_exists()){
+            self::$recurring_donation_id = WC_QD_INSTALL::create_recurring_donation();
+            self::$is_recurring_donation_product_exist = true;
+            update_option(WC_QD_DB.'recurring_product_id',self::$recurring_donation_id); 
+            // self::$is_recurring_donation_product_exist = false;
+            // if($notice){ wc_qd_notice('WooCommerce Reccuring Donation Product Not Exist','error',true);}
         }
     }
 
@@ -86,6 +110,13 @@ class WooCommerce_Quick_Donation {
         return self::$is_donation_product_exist;
     }
     /**
+     * Checks If Donation Product Exist In WooCommerce Products
+     */
+    public function recurring_donation_product_exist_public(){
+        $this->check_recurring_donation_product_exist();
+        return self::$is_recurring_donation_product_exist;
+    }
+    /**
      * Checks If Donation Product Exists In Cart
      */
     public function check_donation_exists_cart(){
@@ -94,7 +125,7 @@ class WooCommerce_Quick_Donation {
         if( sizeof($woocommerce->cart->get_cart()) > 0){
             foreach($woocommerce->cart->get_cart() as $cart_item_key=>$values){
                 $_product = $values['data'];
-                if($_product->id == self::$donation_id)
+                if($_product->id == self::$donation_id or $_product->id == self::$recurring_donation_id)
                     $found = true;
             }
 

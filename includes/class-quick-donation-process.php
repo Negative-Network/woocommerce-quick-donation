@@ -91,6 +91,13 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
                 $this->redirect_cart($key = WC_QD_DB.'already_exist_redirect_user');
                 return false;
             }
+
+            if($this->check_recurring_donation_already_exist()){
+                $message = WC_QD()->db()->get_message(WC_QD_DB.'recurring_donation_already_exist');
+                wc_add_notice($message,'error');
+                $this->redirect_cart($key = WC_QD_DB.'already_exist_redirect_user');
+                return false;
+            }
             
             if($this->added_with_other_products()){
                 $message = WC_QD()->db()->get_message(WC_QD_DB.'donation_with_other_products');
@@ -112,10 +119,30 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
             $woocommerce->session->donation_price = $donate_price;
             $woocommerce->session->projects = $projects;
             
-            $donation_added = $woocommerce->cart->add_to_cart(self::$donation_id);
+            // $woocommerce->cart->empty_cart(); 
+
+            //This is a recurring donation
+            if(isset($_POST['wc_qd_donate_recurring']) and $_POST['wc_qd_donate_recurring'] == 1)
+            {
+                // $woocommerce->session->recurring = true;
+                // $woocommerce->session->period = 'month';
+
+                $donation_added = $woocommerce->cart->add_to_cart(self::$recurring_donation_id);
+                if($donation_added)
+                {
+                    $this->is_recurring_donation_exists = true;
+                } 
+            }
+            else
+            {
+                $donation_added = $woocommerce->cart->add_to_cart(self::$donation_id);
+                if($donation_added) {
+                    $this->is_donation_exists = true;
+                } 
+
+            }
             
             if($donation_added){
-                $this->is_donation_exists = true;
                 $this->redirect_cart();
                 wc_add_notice('Success','success');
             }
@@ -131,6 +158,15 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
     }
     
     public function check_donation_already_exist(){
+        global $woocommerce;
+        foreach($woocommerce->cart->get_cart() as $cart_item_key => $values ) {
+            $_product = $values['data'];
+            if( self::$donation_id == $_product->id ) { return true; }
+        }  
+        return false;
+    }
+    
+    public function check_recurring_donation_already_exist(){
         global $woocommerce;
         foreach($woocommerce->cart->get_cart() as $cart_item_key => $values ) {
             $_product = $values['data'];
@@ -191,7 +227,7 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
     
     public function redirect_cart($key = ''){
         if(empty($key)){$key = WC_QD_DB.'redirect_user';}
-        if($this->is_donation_exists){
+        if($this->is_donation_exists or $this->is_recurring_donation_exists){
             $redirect = WC_QD()->settings()->get_option($key);
             $url = '';
             if($redirect == 'cart'){
