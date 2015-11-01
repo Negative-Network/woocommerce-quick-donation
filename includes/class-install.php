@@ -108,7 +108,10 @@ class WC_QD_INSTALL{
         update_post_meta($post_id, '_featured', 'no');
         update_post_meta($post_id, '_manage_stock', "no" );
         update_post_meta($post_id, '_sold_individually', "yes" );
-        update_post_meta($post_id, '_sku', 'checkout-donation');            
+        update_post_meta($post_id, '_sku', 'checkout-donation');     
+
+        wp_set_object_terms ($post_id,'subscription','product_type');
+
         return $post_id;
     }
      
