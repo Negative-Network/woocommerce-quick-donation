@@ -83,7 +83,7 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
             global $woocommerce;
 
             // $woocommerce->session->destroy_session();
-            // $woocommerce->session->set_customer_session_cookie(true);
+            $woocommerce->session->set_customer_session_cookie(true);
 
             //add form data into the WC session
             if(is_array($woocommerce->session->customer)) 
@@ -125,7 +125,11 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
             $woocommerce->session->donation_price = $donate_price;
             $woocommerce->session->projects = $projects;
 
-            if( $woocommerce->cart ) $woocommerce->cart->empty_cart(); 
+            if( ! isset($woocommerce->cart) ) {
+                $woocommerce->cart;
+                $woocommerce->cart->empty_cart(); 
+                $woocommerce->cart->removed_cart_contents = array(); 
+            } 
 
             //This is a recurring donation
             if(isset($_POST['wc_qd_donate_recurring']) and $_POST['wc_qd_donate_recurring'] == 1)
@@ -147,6 +151,12 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
                 } 
 
             }
+
+            // print_r($woocommerce);
+            // print_r($donation_added);
+            // print_r(self::$recurring_donation_id);
+            // print_r(self::$donation_id);
+            // die;
             
             if($donation_added){
                 $this->redirect_cart();
