@@ -91,6 +91,14 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
             else 
                 $woocommerce->session->customer = $_POST;
 
+            //clear and init the cart
+            // if( ! isset($woocommerce->cart) ) {
+                $woocommerce->cart;
+                $woocommerce->cart->empty_cart(); 
+                $woocommerce->cart->removed_cart_contents = array(); 
+                $woocommerce->cart->recurring_carts = array();
+            // } 
+
             // if($this->check_donation_already_exist()){
             //     $message = WC_QD()->db()->get_message(WC_QD_DB.'donation_already_exist');
             //     wc_add_notice($message,'error');
@@ -125,13 +133,6 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
             $woocommerce->session->donation_price = $donate_price;
             $woocommerce->session->projects = $projects;
 
-            if( ! isset($woocommerce->cart) ) {
-                $woocommerce->cart;
-                $woocommerce->cart->empty_cart(); 
-                $woocommerce->cart->removed_cart_contents = array(); 
-                $woocommerce->cart->recurring_carts = array();
-            } 
-
             //This is a recurring donation
             if(isset($_POST['wc_qd_donate_recurring']) and $_POST['wc_qd_donate_recurring'] == 1)
             {
@@ -152,12 +153,6 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
                 } 
 
             }
-
-            // print_r($woocommerce);
-            // print_r($donation_added);
-            // print_r(self::$recurring_donation_id);
-            // print_r(self::$donation_id);
-            // die;
             
             if($donation_added){
                 $this->redirect_cart();
@@ -294,7 +289,7 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
 	public function get_price($price, $product){
 		global $woocommerce;
          
-        if($product->id == self::$donation_id){ 
+        if($product->id == self::$donation_id OR $product->id == self::$recurring_donation_id){ 
             return isset($woocommerce->session->donation_price) ? floatval($woocommerce->session->donation_price) : 0; 
         } 
 		return $price;

@@ -110,8 +110,6 @@ class WC_QD_INSTALL{
         update_post_meta($post_id, '_sold_individually', "yes" );
         update_post_meta($post_id, '_sku', 'checkout-donation');     
 
-        wp_set_object_terms ($post_id,'subscription','product_type');
-
         return $post_id;
     }
      
@@ -158,6 +156,8 @@ class WC_QD_INSTALL{
         update_post_meta($post_id, '_subscription_trial_period', 'day');
         update_post_meta($post_id, '_subscription_limit', 'no');
         update_post_meta($post_id, '_subscription_one_time_shipping', 'no');
+        
+        wp_set_object_terms ($post_id,'subscription','product_type');
 
         return $post_id;
     }
