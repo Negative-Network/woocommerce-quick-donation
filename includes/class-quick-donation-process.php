@@ -82,8 +82,14 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
             
             global $woocommerce;
 
+            // $woocommerce->session->destroy_session();
+            $woocommerce->session->set_customer_session_cookie(true);
+
             //add form data into the WC session
-            $woocommerce->session->customer = array_merge($woocommerce->session->customer,$_POST);
+            if(is_array($woocommerce->session->customer)) 
+                $woocommerce->session->customer = array_merge($woocommerce->session->customer,$_POST);
+            else 
+                $woocommerce->session->customer = $_POST;
 
             if($this->check_donation_already_exist()){
                 $message = WC_QD()->db()->get_message(WC_QD_DB.'donation_already_exist');
