@@ -99,16 +99,20 @@ class WC_QD_INSTALL{
         );
         
         $post_id = wp_insert_post($post);  
-        update_post_meta($post_id, '_stock_status', 'instock');
-        update_post_meta($post_id, '_tax_status', 'none');
-        update_post_meta($post_id, '_tax_class',  'zero-rate');
-        update_post_meta($post_id, '_visibility', 'hidden');
-        update_post_meta($post_id, '_stock', '');
-        update_post_meta($post_id, '_virtual', 'yes');
-        update_post_meta($post_id, '_featured', 'no');
-        update_post_meta($post_id, '_manage_stock', "no" );
-        update_post_meta($post_id, '_sold_individually', "yes" );
-        update_post_meta($post_id, '_sku', 'checkout-donation');     
+
+        WC_QD_INSTALL::set_post_meta($post_id);
+
+        //If WPML is installed and active
+        //we must duplicate the products for each language
+        //@todo: register filter to create new translations if a new WPML language is added to the site
+        if ( function_exists('icl_object_id') ) {
+            global $iclTranslationManagement;
+            $langs = icl_get_languages('skip_missing=0&orderby=KEY&order=DIR&link_empty_to=str');
+            foreach($langs as $lang) {
+                $dup_id = $iclTranslationManagement->make_duplicate($post_id, $lang['language_code']);
+                if(is_int($dup_id)) WC_QD_INSTALL::set_post_meta($dup_id);
+            }
+        }
 
         return $post_id;
     }
@@ -132,6 +136,25 @@ class WC_QD_INSTALL{
         
         $post_id = wp_insert_post($post);  
 
+        WC_QD_INSTALL::set_post_meta($post_id, true);
+
+        //If WPML is installed and active
+        //we must duplicate the products for each language
+        //@todo: register filter to create new translations if a new WPML language is added to the site
+        if ( function_exists('icl_object_id') ) {
+            global $iclTranslationManagement;
+            $langs = icl_get_languages('skip_missing=0&orderby=KEY&order=DIR&link_empty_to=str');
+            foreach($langs as $lang) {
+                $dup_id = $iclTranslationManagement->make_duplicate($post_id, $lang['language_code']);
+                if(is_int($dup_id)) WC_QD_INSTALL::set_post_meta($dup_id, true);
+            }
+        }
+
+        return $post_id;
+    }
+
+    public static function set_post_meta($post_id, $recurring = false)
+    {
         update_post_meta($post_id, '_stock_status', 'instock');
         update_post_meta($post_id, '_tax_status', 'none');
         update_post_meta($post_id, '_tax_class',  'zero-rate');
@@ -141,33 +164,33 @@ class WC_QD_INSTALL{
         update_post_meta($post_id, '_featured', 'no');
         update_post_meta($post_id, '_manage_stock', "no" );
         update_post_meta($post_id, '_sold_individually', "yes" );
-        update_post_meta($post_id, '_sku', 'checkout-recurring-donation');
-        update_post_meta($post_id, '_regular_price', 10);
-        update_post_meta($post_id, '_price', 10);
-        
-        //subscription data
-        update_post_meta($post_id, '_subscription_price', 10);
-        update_post_meta($post_id, '_subscription_payment_sync_date', 0);
-        update_post_meta($post_id, '_subscription_trial_length', 0);
-        update_post_meta($post_id, '_subscription_sign_up_fee', '');
-        update_post_meta($post_id, '_subscription_period', 'month');
-        update_post_meta($post_id, '_subscription_period_interval', 1);
-        update_post_meta($post_id, '_subscription_length', 0);
-        update_post_meta($post_id, '_subscription_trial_period', 'day');
-        update_post_meta($post_id, '_subscription_limit', 'no');
-        update_post_meta($post_id, '_subscription_one_time_shipping', 'no');
-        
-        wp_set_object_terms ($post_id,'subscription','product_type');
+        update_post_meta($post_id, '_sku', 'checkout-donation'); 
 
-        return $post_id;
+        //subscription data
+        if($recurring)
+        {
+            update_post_meta($post_id, '_regular_price', 10);
+            update_post_meta($post_id, '_price', 10);
+            update_post_meta($post_id, '_subscription_price', 10);
+            update_post_meta($post_id, '_subscription_payment_sync_date', 0);
+            update_post_meta($post_id, '_subscription_trial_length', 0);
+            update_post_meta($post_id, '_subscription_sign_up_fee', '');
+            update_post_meta($post_id, '_subscription_period', 'month');
+            update_post_meta($post_id, '_subscription_period_interval', 1);
+            update_post_meta($post_id, '_subscription_length', 0);
+            update_post_meta($post_id, '_subscription_trial_period', 'day');
+            update_post_meta($post_id, '_subscription_limit', 'no');
+            update_post_meta($post_id, '_subscription_one_time_shipping', 'no');
+
+            wp_set_object_terms ($post_id,'subscription','product_type');
+        }
+
     }
     
     public static function get_template_list(){
         $core_tempalte_list = WC_Admin_Status::scan_template_files( WC_QD_TEMPLATE );
         return $core_tempalte_list;
     }
-    
-    
     
     public static function check_template_files(){
         $template_files = self::get_template_list();

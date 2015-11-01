@@ -51,10 +51,22 @@ class WooCommerce_Quick_Donation {
      */
     public function __construct() {
         $this->define_constant();
-        self::$donation_id = get_option(WC_QD_DB.'product_id');
-        $this->define('WC_QD_ID',intval(get_option(WC_QD_DB.'product_id')));
-        self::$recurring_donation_id = get_option(WC_QD_DB.'recurring_product_id');
-        $this->define('WC_QD_ID',intval(get_option(WC_QD_DB.'recurring_product_id')));
+
+        //WPML Check
+        if ( function_exists('icl_object_id') )
+        {
+            self::$donation_id = icl_object_id(get_option(WC_QD_DB.'product_id'), 'product', false,ICL_LANGUAGE_CODE);
+            self::$recurring_donation_id = icl_object_id(get_option(WC_QD_DB.'recurring_product_id'), 'product', false,ICL_LANGUAGE_CODE);
+        }
+        else
+        {
+            self::$donation_id = get_option(WC_QD_DB.'product_id');
+            self::$recurring_donation_id = get_option(WC_QD_DB.'recurring_product_id');
+        }
+
+        $this->define('WC_QD_ID',intval(self::$donation_id));
+        $this->define('WC_QD_ID',intval(self::$recurring_donation_id));
+
         $this->load_required_files();
         register_activation_hook( __FILE__,array('WC_QD_INSTALL','INIT') );
         add_action( 'init', array( $this, 'init' ));
