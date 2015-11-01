@@ -91,25 +91,25 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
             else 
                 $woocommerce->session->customer = $_POST;
 
-            if($this->check_donation_already_exist()){
-                $message = WC_QD()->db()->get_message(WC_QD_DB.'donation_already_exist');
-                wc_add_notice($message,'error');
-                $this->redirect_cart($key = WC_QD_DB.'already_exist_redirect_user');
-                return false;
-            }
+            // if($this->check_donation_already_exist()){
+            //     $message = WC_QD()->db()->get_message(WC_QD_DB.'donation_already_exist');
+            //     wc_add_notice($message,'error');
+            //     $this->redirect_cart($key = WC_QD_DB.'already_exist_redirect_user');
+            //     return false;
+            // }
 
-            if($this->check_recurring_donation_already_exist()){
-                $message = WC_QD()->db()->get_message(WC_QD_DB.'recurring_donation_already_exist');
-                wc_add_notice($message,'error');
-                $this->redirect_cart($key = WC_QD_DB.'already_exist_redirect_user');
-                return false;
-            }
+            // if($this->check_recurring_donation_already_exist()){
+            //     $message = WC_QD()->db()->get_message(WC_QD_DB.'recurring_donation_already_exist');
+            //     wc_add_notice($message,'error');
+            //     $this->redirect_cart($key = WC_QD_DB.'already_exist_redirect_user');
+            //     return false;
+            // }
             
-            if($this->added_with_other_products()){
-                $message = WC_QD()->db()->get_message(WC_QD_DB.'donation_with_other_products');
-                wc_add_notice($message,'error');
-                return false;
-            }
+            // if($this->added_with_other_products()){
+            //     $message = WC_QD()->db()->get_message(WC_QD_DB.'donation_with_other_products');
+            //     wc_add_notice($message,'error');
+            //     return false;
+            // }
 
             $donateprice = isset($_POST['wc_qd_donate_project_price']) ? $_POST['wc_qd_donate_project_price'] : false;
 			$projects = isset($_POST['wc_qd_donate_project_name']) && !empty($_POST['wc_qd_donate_project_name']) ? $_POST['wc_qd_donate_project_name'] : false;
@@ -129,6 +129,7 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
                 $woocommerce->cart;
                 $woocommerce->cart->empty_cart(); 
                 $woocommerce->cart->removed_cart_contents = array(); 
+                $woocommerce->cart->recurring_carts = array();
             } 
 
             //This is a recurring donation
