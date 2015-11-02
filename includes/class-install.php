@@ -182,7 +182,7 @@ class WC_QD_INSTALL{
             update_post_meta($post_id, '_subscription_limit', 'no');
             update_post_meta($post_id, '_subscription_one_time_shipping', 'no');
 
-            wp_set_object_terms ($post_id,'subscription','product_type');
+            // wp_set_object_terms ($post_id,'subscription','product_type');
         }
 
     }
