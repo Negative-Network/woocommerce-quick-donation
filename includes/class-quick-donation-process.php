@@ -97,6 +97,7 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
                 $woocommerce->cart->empty_cart(); 
                 $woocommerce->cart->removed_cart_contents = array(); 
                 $woocommerce->cart->recurring_carts = array();
+                $woocommerce->session->recurring = false;
             // } 
 
             // if($this->check_donation_already_exist()){
@@ -137,7 +138,10 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
             if(isset($_POST['wc_qd_donate_recurring']) and $_POST['wc_qd_donate_recurring'] == 1)
             {
                 $woocommerce->session->recurring = true;
-                $woocommerce->session->period = 'month';
+                $woocommerce->session->period = 12;
+
+                if(isset($_POST['wc_qd_donate_recurring_period']) and 12 % intval($_POST['wc_qd_donate_recurring_period']) == 0)
+                    $woocommerce->session->period = intval($_POST['wc_qd_donate_recurring_period']);
 
                 $donation_added = $woocommerce->cart->add_to_cart(self::$recurring_donation_id);
                 if($donation_added)
@@ -151,7 +155,6 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
                 if($donation_added) {
                     $this->is_donation_exists = true;
                 } 
-
             }
             
             if($donation_added){
