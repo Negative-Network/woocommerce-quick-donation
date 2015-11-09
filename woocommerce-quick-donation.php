@@ -36,6 +36,7 @@ class WooCommerce_Quick_Donation {
     public static $settings_values = null;
     public static $email = null;
     private static $db = null;
+	private static $admin = null;
     /**
      * Creates or returns an instance of this class.
      */
@@ -108,8 +109,8 @@ class WooCommerce_Quick_Donation {
             self::$recurring_donation_id = WC_QD_INSTALL::create_recurring_donation();
             self::$is_recurring_donation_product_exist = true;
             update_option(WC_QD_DB.'recurring_product_id',self::$recurring_donation_id); 
-            // self::$is_recurring_donation_product_exist = false;
-            // if($notice){ wc_qd_notice('WooCommerce Reccuring Donation Product Not Exist','error',true);}
+            // self::$is_donation_product_exist = false;
+            // if($notice){ wc_qd_notice(__('WooCommerce Donation Product Not Exist',WC_QD_TXT),'error',true);}
         }
     }
 
@@ -117,8 +118,8 @@ class WooCommerce_Quick_Donation {
     /**
      * Checks If Donation Product Exist In WooCommerce Products
      */
-    public function donation_product_exist_public(){
-        $this->check_donation_product_exist();
+    public function donation_product_exist_public($notice = false){
+        $this->check_donation_product_exist($notice);
         return self::$is_donation_product_exist;
     }
     /**
@@ -164,6 +165,7 @@ class WooCommerce_Quick_Donation {
         }
         
         if($this->is_request('admin')){
+		   $this->load_files(WC_QD_ADMIN.'class-admin-init.php');
            $this->load_files(WC_QD_ADMIN.'class-*.php');
         } 
 
@@ -173,11 +175,11 @@ class WooCommerce_Quick_Donation {
      * Inits loaded Class
      */
     private function init_class(){
-        self::$email = new WooCommerce_Quick_Donation_Emails_Functions;
-        self::$f = new WooCommerce_Quick_Donation_Functions;
-        self::$settings = new WooCommerce_Quick_Donation_Settings;
         self::$db = new WooCommerce_Quick_Donation_DB; 
-        
+        self::$f = new WooCommerce_Quick_Donation_Functions;
+		self::$email = new WooCommerce_Quick_Donation_Emails_Functions;
+	    self::$settings = new WooCommerce_Quick_Donation_Settings; 
+		
         if($this->is_request('frontend')){
             self::$shortcode = new WooCommerce_Quick_Donation_Shortcode;
             $this->donation  =  new WooCommerce_Quick_Donation_Process;
@@ -185,8 +187,10 @@ class WooCommerce_Quick_Donation {
         }
         
         if($this->is_request('admin')){
-            $this->admin = new WooCommerce_Quick_Donation_Admin;
+            self::$admin = new WooCommerce_Quick_Donation_Admin;
         }
+		
+		 
  
     }
     
@@ -194,7 +198,7 @@ class WooCommerce_Quick_Donation {
      * Function Get Call Admin
      */
     public function admin(){
-        return $this->admin;
+        return self::$admin;
     }
     
     /**
@@ -287,6 +291,7 @@ class WooCommerce_Quick_Donation {
 
         $this->define('WC_QD_TB',$wpdb->prefix . 'wc_quick_donation');
         $this->define('WC_QD_DB','wc_qd_');
+		$this->define('WC_QD_DB_SETTINGS','wc_qd');
         $this->define('WC_QD_PT','wcqd_project');
         $this->define('WC_QD_CAT','wcqd_category');
         $this->define('WC_QD_TAG','wcqd_tags'); 
