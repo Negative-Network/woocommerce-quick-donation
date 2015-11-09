@@ -158,7 +158,7 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
             
 			$woocommerce->session->is_donation_product = true;
             
-            $donation_added = $woocommerce->cart->add_to_cart(self::$donation_id);
+            // $donation_added = $woocommerce->cart->add_to_cart(self::$donation_id);
             
             if($donation_added){
                 $this->redirect_cart();
