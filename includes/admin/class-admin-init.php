@@ -35,6 +35,7 @@ class WooCommerce_Quick_Donation_Admin  {
     
     public function load_required_files(){
         WC_QD()->load_files(WC_QD_ADMIN.'metabox_framework/meta-box.php'); 
+		WC_QD()->load_files(WC_QD_ADMIN.'wp-donation-listing-table.php');
     } 
     
     public function init_hooks(){
@@ -52,36 +53,42 @@ class WooCommerce_Quick_Donation_Admin  {
     }
     
     public function admin_screen(){ 
+		
         if($this->sys_info == $this->current_screen()){
             if(!WC_QD()->is_request('ajax')){
                 $this->add_notice();
             }
         } 
+		
+		if($this->order_menu_slug == $this->current_screen()){
+			$donor_listing = new WC_Quick_Donation_Listing_Table;
+			$donor_listing->process_bulk_action();
+		}
     }
     
     public function sub_donation_order_menu(){
         
-        $this->order_menu_slug = add_submenu_page('edit.php?post_type=wcqd_project',
+        $this->order_menu_slug = add_submenu_page('edit.php?post_type='.WC_QD_PT,
                                                   __('Donation Orders',WC_QD_TXT),
                                                   __('Donation\'s',WC_QD_TXT),
                                                   'administrator',
                                                   'wc_qd_orders',
                                                   array($this,'donation_orders_page'));
         
-        $this->donors_list = add_submenu_page('edit.php?post_type=wcqd_project',
+        $this->donors_list = add_submenu_page('edit.php?post_type='.WC_QD_PT,
                                                   __('Donors List',WC_QD_TXT),
                                                   __('Donors List',WC_QD_TXT),
                                                   'administrator',
                                                   'wc_qd_donors',
                                                   array($this,'donors_listing_page'));
         
-        $this->sys_info = add_submenu_page('edit.php?post_type=wcqd_project',
+        $this->sys_info = add_submenu_page('edit.php?post_type='.WC_QD_PT,
                                                   __('System Tools',WC_QD_TXT),
                                                   __('System Tools',WC_QD_TXT),
                                                   'administrator',
                                                   'wc_qd_sys_info',
                                                   array($this,'system_tools'));
-        $this->tools = add_submenu_page('edit.php?post_type=wcqd_project',
+        $this->tools = add_submenu_page('edit.php?post_type='.WC_QD_PT,
                                                   __('',WC_QD_TXT),
                                                   __('',WC_QD_TXT),
                                                   'administrator',
@@ -95,15 +102,24 @@ class WooCommerce_Quick_Donation_Admin  {
         $name = 'edit.php?post_type='.WC_QD_PT;
         if(empty($submenu)){return $submenu;}
         $arr = array();
-        $arr[] = $submenu[$name][18];
-        $arr[] = $submenu[$name][19];
-        $arr[] = $submenu[$name][5];
+		$seperator = array();
+		$seperator[0] = '';
+		$seperator[1] = 'read';
+		$seperator[2] = 'separator10';
+		$seperator[3] = '';
+		$seperator[4] = 'wp-menu-separator';
+		$arr[] = $submenu[$name][5];
         $arr[] = $submenu[$name][10];
         $arr[] = $submenu[$name][15];
         $arr[] = $submenu[$name][16];
-        $arr[] = $submenu[$name][17];
+		$arr[] = $seperator;
+		$arr[] = $submenu[$name][18];
+        $arr[] = $submenu[$name][19];
+		$arr[] = $seperator;
+		$arr[] = $submenu[$name][17];
         $arr[] = $submenu[$name][20];
-        $submenu[$name] = $arr;
+
+		$submenu[$name] = $arr;
         return $menu_ord;
     }  
     
@@ -183,7 +199,7 @@ class WooCommerce_Quick_Donation_Admin  {
         } 
         if(isset($_GET['post_status'])){ $args['post_status'] = $_GET['post_status'];}    
         $wp_query = new WP_Query($args);
-        require('wp-donation-listing-table.php');
+        
         tt_render_list_page($wp_query);
     }
     
@@ -214,18 +230,21 @@ class WooCommerce_Quick_Donation_Admin  {
         if(in_array($this->current_screen() , $this->get_screen_ids())) {
             wp_enqueue_script(WC_QD_SLUG.'_core_script', WC_QD_JS.'admin-script.js', array('jquery'), WC_QD()->version, false ); 
         }
+		if($this->tools == $this->current_screen()){
+			wp_enqueue_script(WC_QD_SLUG.'_tools_Page_script', WC_QD_JS.'tools-page.js',array('jquery'), WC_QD()->version,false); 
+		}
+		
         if($this->sys_info == $this->current_screen()){
-            wp_register_script(WC_QD_SLUG.'_sysinfo_script', WC_QD_JS.'sysinfo.js', array( 'jquery' ), WC_QD()->version,false );
-            wp_localize_script(WC_QD_SLUG.'_sysinfo_script', 'systemInfoAjax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
-            wp_enqueue_script(WC_QD_SLUG.'_sysinfo_script');
-            
+            wp_register_script(WC_QD_SLUG.'_sysinfo_script', WC_QD_JS.'sysinfo.js', array( 'jquery' ), WC_QD()->version,false);
+            wp_localize_script(WC_QD_SLUG.'_sysinfo_script', 'systemInfoAjax', array( 'ajaxurl' => admin_url('admin-ajax.php')));
+            wp_enqueue_script(WC_QD_SLUG.'_sysinfo_script');            
         }
             
 	}
     
     public function set_wc_screen_ids($screens){
         $screen = $screens; 
-        $screen[] = 'wcqd_project_page_WC_QD_settings';
+        $screen[] = WC_QD_PT.'_page_wc_qd_settings';
         $screen[] = $this->order_menu_slug;
         $screen[] = $this->donors_list;
         $screen[] = $this->sys_info; 
@@ -250,8 +269,7 @@ class WooCommerce_Quick_Donation_Admin  {
         $screen_ids = array();
         $screen_ids[] = 'edit-product';
         $screen_ids[] = 'product';
-        $screen_ids[] = WC_QD_PT.'_page_wc_qd_settings';
-        $screen_ids[] = 'wcqd_project_page_WC_QD_settings';
+        $screen_ids[] = WC_QD_PT.'_page_wc_qd_settings'; 
         $screen_ids[] = $this->order_menu_slug;
         $screen_ids[] = $this->order_menu_slug;
         $screen_ids[] = $this->donors_list;

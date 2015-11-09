@@ -21,10 +21,18 @@ class WooCommerce_Quick_Donation_Admin_Function {
         add_action( 'post_row_actions', array($this,'protect_donation_product'),99,2);
         add_action( 'parse_query', array( $this, 'hide_donation_order_woocommerce_order' ) );
         add_filter( 'wc_order_types',array($this,'add_wc_order_types'),1,2);
+		add_action( 'delete_post', array($this,'delete_donation'));
+		add_action( 'wp_ajax_CreateDonationProduct', array($this,'create_donation_product') );
     }   
     
     
-
+	public function delete_donation($id){
+		if('shop_order' == get_post_type($id)){
+			if(wcqd_is_donation($id)){
+				WC_QD()->db()->delete_donation_entry($id);
+			}
+		}
+	}
     
     public function hide_donation_order_woocommerce_order($query) {
         global $pagenow,$post_type;  
@@ -78,8 +86,9 @@ class WooCommerce_Quick_Donation_Admin_Function {
         return $actions;
 	}  
     
+   
     
-    
+	
     public function get_OverRided(){
         $template_files = WC_QD_INSTALL::get_template_list();
         $overrided = array();
@@ -109,5 +118,40 @@ class WooCommerce_Quick_Donation_Admin_Function {
             }
         }
         return $overrided;
-    }    
+    }
+	
+	
+	public function create_donation_product(){
+		if(! isset($_REQUEST['_wpnonce'])) {
+			echo '<span class="wc_qd_error">Invalid Nonce. kindly try again</span>';
+			exit;
+		}
+		
+		if(wp_verify_nonce($_REQUEST['_wpnonce'], 'CreateDonationProduct')){
+			$type = 'simple';
+			$install = new WC_QD_INSTALL;
+			$callBack_function = 'create_'.$type.'_donation';
+			$donation_exist = $install::check_donation_exists();
+			
+			if(isset($_REQUEST['force'])){
+				$post_id = $install::$callBack_function(); 
+				update_option(WC_QD_DB.'product_id',$post_id); 
+				echo '<span class="wcqdsuccess">'.__('Donation Product Created',WC_QD_TXT).'</span>';
+				exit;
+			}
+			
+			if(! $donation_exist){
+				$post_id = $install::$callBack_function(); 
+				update_option(WC_QD_DB.'product_id',$post_id); 
+				echo '<span class="wcqdsuccess">'.__('Donation Product Created',WC_QD_TXT).'</span>';
+			} else {
+				$url = wp_nonce_url(admin_url('admin-ajax.php?action=CreateDonationProduct&force=true'),'CreateDonationProduct'); 
+				echo '<button href="'.$url.'" 
+				       class="wcqdAjaxCall button wcqdAutoRemove" type="button">
+					   '.__('Force Create Donation Product',WC_QD_TXT).'</button>';
+			}
+		}  
+		
+		exit;
+	}
 }

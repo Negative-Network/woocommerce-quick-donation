@@ -14,9 +14,11 @@ class WooCommerce_Quick_Donation_Functions  {
             'field-select.php' => 'fields/field-select.php',
             'field-text.php' => 'fields/field-text.php',
             'myaccount/my-donations.php' => 'myaccount/my-donations.php',
+			'cart/mini-cart.php' => 'cart/donation-mini-cart.php',
         ),
 
         'is_donation' => array( 
+			
             'cart/cart-item-data.php' => 'cart/donation-cart-item-data',
             'cart/cart-shipping.php' => 'cart/donation-cart-shipping.php',
             'cart/cart-totals.php' => 'cart/donation-cart-totals.php',
@@ -45,7 +47,7 @@ class WooCommerce_Quick_Donation_Functions  {
 
             'emails/email-styles.php' => 'emails/donation-email-styles.php',
             
-            'emails/donation-customer-invoice.php' => 'emails/donation-customer-invoice.php',
+            'emails/donation-admin-new.php' => 'emails/donation-admin-new.php',
             'emails/email-addresses.php' => 'emails/donation-email-addresses.php',
             'emails/donation-email-footer.php' => 'emails/donation-email-footer.php',
             'emails/donation-email-header.php' => 'emails/donation-email-header.php',
@@ -53,8 +55,10 @@ class WooCommerce_Quick_Donation_Functions  {
             'emails/plain/email-addresses.php' => 'emails/plain/donation-email-addresses.php',
             'emails/plain/email-order-items.php' => 'emails/plain/donation-email-order-items.php',
             'emails/plain/donation-customer-invoice.php' => 'emails/plain/donation-customer-invoice.php',
+            
+            'emails/donation-processing.php' => 'emails/donation-processing.php',
+            'emails/plain/donation-processing.php' => 'emails/plain/donation-processing.php',
         )
-        
         
         );    
     
@@ -64,6 +68,11 @@ class WooCommerce_Quick_Donation_Functions  {
         add_action( 'woocommerce_available_payment_gateways',array($this,'remove_gateway'));
         add_filter( 'woocommerce_locate_template' , array($this,'wc_locate_template'),10,3);
         add_filter( 'the_title', array($this,'wc_page_endpoint_title' ),10,2);
+		add_filter( 'wp_count_posts', array($this,'modify_wp_count_posts'),99,3);
+    }
+    
+    public function get_template_list(){
+        return self::$search_template;
     }
     
     
@@ -97,8 +106,8 @@ class WooCommerce_Quick_Donation_Functions  {
     
     public function add_email_classes($email_classes){
         $email_classes[WC_QD_DB.'new_donation_email'] = require(WC_QD_INC.'emails/class-new-email.php');
-        //$email_classes[WC_QD_DB.'processing_donation_email'] = require(WC_QD_INC.'emails/class-processing-email.php');
-        //$email_classes[WC_QD_DB.'completed_donation_email'] = require(WC_QD_INC.'emails/class-completed-email.php');
+        $email_classes[WC_QD_DB.'donation_processing_email'] = require(WC_QD_INC.'emails/class-processing-email.php');
+        $email_classes[WC_QD_DB.'donation_completed_email'] = require(WC_QD_INC.'emails/class-completed-email.php');
         return $email_classes;
     }
     
@@ -110,7 +119,7 @@ class WooCommerce_Quick_Donation_Functions  {
             return self::$project_db_list;
         }
         $args = array(
-            'posts_per_page'   => 0,
+            'posts_per_page'   => -1,
             'offset'           => 0,
             'category'         => '',
             'category_name'    => '',
@@ -146,16 +155,17 @@ class WooCommerce_Quick_Donation_Functions  {
     }
     
      
-    public function generate_donation_selbox($grouped = false,$type = 'select'){
+    public function generate_donation_selbox($grouped = false,$type = 'select',$selected=''){
         global $id, $name, $class, $field_output, $is_grouped, $project_list,$attributes;
         $field_output = '';
+		
         $id = 'donation_project';
         $name = 'wc_qd_donate_project_name';
         $class = apply_filters('wcqd_project_name_'.$type.'_class',array(),$type);
         $custom_attributes = apply_filters('wcqd_project_name_'.$type.'_attribute',array(),$type);
         $is_grouped = $grouped;
         $project_list = $this->get_porject_list($grouped);
-        
+		
         $class = implode(' ',$class);
         $attributes = '';
         foreach($custom_attributes as $attr_key => $attr_val) {
@@ -168,6 +178,7 @@ class WooCommerce_Quick_Donation_Functions  {
                                                                                      'field_output' => $field_output, 
                                                                                      'is_grouped' => $is_grouped, 
                                                                                      'project_list' => $project_list, 
+																					 'pre_selected' => $selected,
                                                                                      'attributes' => $attributes));
         return $field_output;
     }
@@ -238,9 +249,9 @@ class WooCommerce_Quick_Donation_Functions  {
     
     public function remove_gateway($gateways){
         if(WC_QD()->check_donation_exists_cart()){
-           // var_dump($gateway);
            $allowed_gateway = WC_QD()->settings()->get_option(WC_QD_DB.'payment_gateway');
-           foreach($gateways as $gateway){
+           if($allowed_gateway === false){return $gateways;}
+			foreach($gateways as $gateway){
                 if(! in_array($gateway->id,$allowed_gateway)){
                     unset($gateways[$gateway->id]);
                 }
@@ -309,4 +320,32 @@ class WooCommerce_Quick_Donation_Functions  {
         }
         return $located;
     }    
+	
+	public function modify_wp_count_posts($old_status,$type, $perm = '' ) {
+		global $wpdb;
+		 
+		if ( ! post_type_exists( $type ) ) { return new stdClass;}
+		$cache_key = _count_posts_cache_key( $type, $perm );
+		$counts = wp_cache_get( $cache_key, 'wc_qd_modified_wp_count_posts' );
+				
+		if ( false !== $counts ) { return apply_filters( 'wc_qd_modified_wp_count_posts', $counts, $type, $perm ); }
+		$query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE  ";
+		$query .= " ID NOT IN (SELECT donationid FROM `".WC_QD_TB."`) ";
+		$query .= " AND post_type = %s ";
+		if ( 'readable' == $perm && is_user_logged_in() ) {
+			$post_type_object = get_post_type_object($type);
+			if ( ! current_user_can( $post_type_object->cap->read_private_posts ) ) {
+				$query .= $wpdb->prepare( " AND (post_status != 'private' OR ( post_author = %d AND post_status = 'private' ))",
+					get_current_user_id()
+				);
+			}
+		}
+		$query .= ' GROUP BY post_status';
+		$results = (array) $wpdb->get_results( $wpdb->prepare( $query, $type ), ARRAY_A );
+		$counts = array_fill_keys( get_post_stati(), 0 );
+		foreach ( $results as $row ) { $counts[ $row['post_status'] ] = $row['num_posts']; }
+		$counts = (object) $counts;
+		wp_cache_set( $cache_key, $counts, 'wc_qd_modified_wp_count_posts' );
+		return apply_filters( 'wc_qd_modified_wp_count_posts', $counts, $type, $perm );
+	}	
 }
