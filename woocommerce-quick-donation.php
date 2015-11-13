@@ -92,7 +92,7 @@ class WooCommerce_Quick_Donation {
     private function check_donation_product_exist($notice = true){
         $install = new WC_QD_INSTALL;
         if(! $install->check_donation_exists()){
-            self::$donation_id = WC_QD_INSTALL::create_donation();
+            self::$donation_id = WC_QD_INSTALL::create_simple_donation();
             self::$is_donation_product_exist = true;
             update_option(WC_QD_DB.'product_id',self::$donation_id); 
             // self::$is_donation_product_exist = false;
