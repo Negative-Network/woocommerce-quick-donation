@@ -9,6 +9,7 @@ class WC_QD_INSTALL{
         $donation_exist = self::check_donation_exists();
         $recurring_donation_exist = self::check_recurring_donation_exists();
         self::check_db_version();
+		  
         self::post_register();
         self::wc_qd_table_install();
         self::check_template_files();
@@ -30,6 +31,9 @@ class WC_QD_INSTALL{
         WC_QD_Post_Types::register_donation_posttype();
         WC_QD_Post_Types::register_donation_category();
         WC_QD_Post_Types::register_donation_tags();
+		
+		add_rewrite_endpoint('donate-now', EP_ROOT);
+		
         flush_rewrite_rules();
     }
 
