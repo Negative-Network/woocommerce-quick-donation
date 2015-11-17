@@ -136,7 +136,7 @@ class WooCommerce_Quick_Donation {
     public function check_donation_exists_cart(){
         global $woocommerce;
         $found = false;
-        if( sizeof($woocommerce->cart->get_cart()) > 0){
+        if( $woocommerce->cart != null AND sizeof($woocommerce->cart->get_cart()) > 0){
             foreach($woocommerce->cart->get_cart() as $cart_item_key=>$values){
                 $_product = $values['data'];
                 if($_product->id == self::$donation_id or $_product->id == self::$recurring_donation_id)
