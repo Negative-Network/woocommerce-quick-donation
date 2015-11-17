@@ -89,8 +89,8 @@ class WooCommerce_Quick_Donation_Admin  {
                                                   'wc_qd_sys_info',
                                                   array($this,'system_tools'));
         $this->tools = add_submenu_page('edit.php?post_type='.WC_QD_PT,
-                                                  __('',WC_QD_TXT),
-                                                  __('',WC_QD_TXT),
+                                                  '',
+                                                  '',
                                                   'administrator',
                                                   'wc_qd_tools',
                                                   array($this,'system_tools'));
