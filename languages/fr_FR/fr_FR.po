@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: WC Quick Donation\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woocommerce-quick-"
 "donation\n"
-"POT-Creation-Date: 2015-11-17 16:22+0100\n"
-"PO-Revision-Date: 2015-11-17 16:38+0100\n"
+"POT-Creation-Date: 2015-11-19 13:10+0100\n"
+"PO-Revision-Date: 2015-11-19 13:13+0100\n"
 "Last-Translator: Pierre Blarre <pierre@negative-network.com>\n"
 "Language-Team: Negative Network <contact@negative-network.com>\n"
 "Language: en\n"
@@ -447,7 +447,7 @@ msgid "View other orders"
 msgstr "Voir d'autres commandes"
 
 #: ../.././includes/admin/metabox/class-donation-info-metabox.php:237
-#: ../.././template/checkout/donation-form-billing.php:23
+#: ../.././template/checkout/donation-form-billing.php:26
 msgid "Donor Details"
 msgstr "Coordonnées du donateur"
 
@@ -502,6 +502,7 @@ msgid "Project Name"
 msgstr "Nom du projet"
 
 #: ../.././includes/admin/metabox/html/html-donation-info.php:35
+#: ../.././template/donation-form.php:18
 msgid "Donation Amount"
 msgstr "Montant du don"
 
@@ -921,8 +922,9 @@ msgid "Move to Trash"
 msgstr "Mettre à la corbeille"
 
 #: ../.././includes/admin/wp-donation-listing-table.php:476
+#: ../.././template/donation-form.php:14
 msgid "Donation Project"
-msgstr "Projet de don"
+msgstr "Campagne de don"
 
 #: ../.././includes/admin/wp-donation-listing-table.php:500
 msgid "All categories"
@@ -1197,14 +1199,14 @@ msgstr ""
 msgid " Download's so far. help use reach more audience by sharing"
 msgstr ""
 
-#: ../.././includes/class-install.php:92
+#: ../.././includes/class-install.php:103
 #, php-format
 msgid ""
 "<p>Please Configure Any One Payment Gatway To Get Plugin Work :) </p> <p "
 "class=\"submit\">%s Config Gateway %s %s</p>"
 msgstr ""
 
-#: ../.././includes/class-install.php:201
+#: ../.././includes/class-install.php:287
 #, php-format
 msgid ""
 "<p> <strong>Your theme (%s) contains outdated copies of some WooCommerce "
@@ -1607,15 +1609,15 @@ msgstr ""
 msgid "Return To Cart"
 msgstr "Retour au panier"
 
-#: ../.././template/checkout/donation-form-billing.php:19
+#: ../.././template/checkout/donation-form-billing.php:22
 msgid "Billing &amp; Shipping"
 msgstr "Facturation &amp; Livraison"
 
-#: ../.././template/checkout/donation-form-billing.php:42
+#: ../.././template/checkout/donation-form-billing.php:50
 msgid "Create an account?"
 msgstr "Créer un compte?"
 
-#: ../.././template/checkout/donation-form-billing.php:53
+#: ../.././template/checkout/donation-form-billing.php:61
 msgid ""
 "Create an account by entering the information below. If you are a returning "
 "customer please login at the top of the page."
@@ -1772,6 +1774,11 @@ msgstr "Date:"
 msgid "Thank you. Your order has been received."
 msgstr "Merci. Votre commande a été prise en compte."
 
+#: ../.././template/donation-form.php:23
+#, fuzzy
+msgid "Add Donation"
+msgstr "Donation"
+
 #: ../.././template/emails/donation-admin-new.php:20
 #: ../.././template/emails/donation-customer-invoice.php:20
 #: ../.././template/emails/plain/donation-admin-new.php:17
@@ -1838,6 +1845,8 @@ msgid ""
 "Your donation has been received and is now being processed. Your donation "
 "details are shown below for your reference:"
 msgstr ""
+"Votre don a bien été reçu et est en cours de traitement. Vous pouvez "
+"vérifier les détails de votre don ci dessous:"
 
 #: ../.././template/emails/donation-processing.php:22
 #, php-format
@@ -1967,13 +1976,12 @@ msgstr "et a été achevé"
 msgid " ago"
 msgstr " depuis"
 
-#: ../.././woocommerce-quick-donation.php:78
-msgid "WooCommerce Donation Product Not Exist"
-msgstr "WooCommerce Donation Product Not Exist"
-
-#: ../.././woocommerce-quick-donation.php:322
+#: ../.././woocommerce-quick-donation.php:365
 msgid "WooCommerce Is Required. To Use This Plugin :)"
 msgstr ""
+
+#~ msgid "WooCommerce Donation Product Not Exist"
+#~ msgstr "WooCommerce Donation Product Not Exist"
 
 #~ msgctxt "Order number by X"
 #~ msgid "%s "
