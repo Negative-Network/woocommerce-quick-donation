@@ -107,7 +107,7 @@ class WooCommerce_Quick_Donation_Functions  {
             'post_parent'      => '',
             'author'	   => '',
             'post_status'      => 'publish',
-            'suppress_filters' => true 
+            'suppress_filters' => 0 
         );
         self::$project_db_list = get_posts($args);
         return self::$project_db_list;
