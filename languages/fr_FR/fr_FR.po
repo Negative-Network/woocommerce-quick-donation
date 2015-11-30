@@ -4,7 +4,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/woocommerce-quick-"
 "donation\n"
 "POT-Creation-Date: 2015-11-19 13:10+0100\n"
-"PO-Revision-Date: 2015-11-19 13:13+0100\n"
+"PO-Revision-Date: 2015-11-30 12:15+0100\n"
 "Last-Translator: Pierre Blarre <pierre@negative-network.com>\n"
 "Language-Team: Negative Network <contact@negative-network.com>\n"
 "Language: en\n"
@@ -255,7 +255,7 @@ msgstr "Commandes Donations"
 
 #: ../.././includes/admin/class-admin-init.php:73
 msgid "Donation's"
-msgstr "de la donation"
+msgstr "Donations"
 
 #: ../.././includes/admin/class-admin-init.php:79
 #: ../.././includes/admin/class-admin-init.php:80

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WC Quick Donation\n"
 "POT-Creation-Date: 2015-10-28 18:04+0100\n"
-"PO-Revision-Date: 2015-10-28 18:47+0100\n"
+"PO-Revision-Date: 2015-11-30 12:15+0100\n"
 "Last-Translator: Pierre Blarre <pierre@negative-network.com>\n"
 "Language-Team: Negative Network <contact@negative-network.com>\n"
 "Language: en\n"
@@ -26,7 +26,7 @@ msgstr "Commandes Donations"
 
 #: includes/admin/class-admin-init.php:50
 msgid "Donation's"
-msgstr "de la donation"
+msgstr "Donations"
 
 #: includes/admin/class-admin-init.php:56
 #: includes/admin/class-admin-init.php:57
