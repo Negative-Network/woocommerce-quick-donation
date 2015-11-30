@@ -136,15 +136,24 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
             $projects = isset($_POST['wc_qd_donate_project_name']) && !empty($_POST['wc_qd_donate_project_name']) ? $_POST['wc_qd_donate_project_name'] : $project_id;
 
             $check_donation_price = $this->check_donation_price_status($donateprice);
-            if( ! $check_donation_price){return false;}
+            if( ! $check_donation_price)
+            {
+                wc_add_notice('Donation price status failed','error');
+                return false;
+            }
+
 
             $donate_price = floatval($donateprice);
             
             $price_check = $this->check_min_max($projects,$donate_price);
-            if(!$price_check){return false;}
-            
+            if(!$price_check){
+                wc_add_notice('Min / max project price failed','error');
+                return false;
+            }
+
             $woocommerce->session->donation_price = $donate_price;
             $woocommerce->session->projects = $projects;
+
 
             //This is a recurring donation
             if(isset($_POST['wc_qd_donate_recurring']) and $_POST['wc_qd_donate_recurring'] == 1)
