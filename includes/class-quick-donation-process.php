@@ -159,11 +159,11 @@ class WooCommerce_Quick_Donation_Process extends WooCommerce_Quick_Donation  {
             if(isset($_POST['wc_qd_donate_recurring']) and $_POST['wc_qd_donate_recurring'] == 1)
             {
                 $woocommerce->session->recurring = true;
-                $woocommerce->session->period = 1;
-                // $woocommerce->session->period = 12;
+                // $woocommerce->session->period = 1;
+                $woocommerce->session->period = 12;
 
-                // if(isset($_POST['wc_qd_donate_recurring_period']) and 12 % intval($_POST['wc_qd_donate_recurring_period']) == 0)
-                //     $woocommerce->session->period = intval($_POST['wc_qd_donate_recurring_period']);
+                if(isset($_POST['wc_qd_donate_recurring_period']) and 12 % intval($_POST['wc_qd_donate_recurring_period']) == 0)
+                    $woocommerce->session->period = intval($_POST['wc_qd_donate_recurring_period']);
 
                 $donation_added = $woocommerce->cart->add_to_cart(self::$recurring_donation_id);
                 if($donation_added)
